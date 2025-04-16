@@ -46,9 +46,9 @@ def calculate_loan_emi(loan_amount, interest_rate, loan_term):
 # Function to determine the interest rate based on CIBIL score
 def get_interest_rate(cibil_score):
     if cibil_score < 600:
-        return 18  # Very high risk
+        return 15  # Very high risk
     elif 600 <= cibil_score <= 649:
-        return 14  # High risk
+        return 12  # High risk
     elif 650 <= cibil_score <= 749:
         return 9   # Moderate risk
     elif cibil_score >= 750:
@@ -110,6 +110,11 @@ def predict():
     data = request.get_json()
     print("Received data from React:", data)  # Log incoming data
 
+    student = 0
+    if(data['Employment_Status']=="Student"):
+        student = 1
+    print('Student status',student)
+
     try:
         # Ensuring correct conversion of the data types
         manual_input = {
@@ -118,7 +123,7 @@ def predict():
             'Dependents': int(data['Dependents']),
             'Age': int(data['Age']),
             'Education': data['Education'],
-            'Employment_Status': data['Employment_Status'],
+            'Employment_Status': data['Employment_Status'].replace('Student', 'Not Employed'),
             'Total_Income': int(data['Total_Income']),
             'Existing_EMI': int(data['Existing_EMI']),
             'Residential_Status': data['Residential_Status'],
@@ -137,7 +142,7 @@ def predict():
         # Condition checks before passing to model (without returning 400 errors)
         if manual_input['Age'] > 55:
             reasons.append("Age is greater than 55, which might affect eligibility.")
-        if manual_input['Employment_Status'].lower() == 'not_employed':
+        if manual_input['Employment_Status'].lower() == 'not employed' and student != 1:
             reasons.append("Employment status is 'Not Employed', which is risky for approval.")
         if manual_input['Cibil_Score'] < 600:
             reasons.append("CIBIL Score is below 600, which affects loan eligibility.")
@@ -152,8 +157,8 @@ def predict():
         print(f"Remaining Income after deductions: ₹{remaining_income:.2f}")
 
         # Ensure remaining income is greater than ₹8,000
-        if remaining_income <= 8000:
-            reasons.append("Remaining income after deductions is too low (< ₹8,000), which affects approval.")
+        if remaining_income <= 1:
+            reasons.append("You are Unable to Pay EMI due to low income")
 
         # If reasons list is not empty, reject the application with reasons
         if reasons:
