@@ -71,8 +71,8 @@ def predict_loan_eligibility(manual_input):
 
     # Predict using XGBoost
     xgb_prob = best_model.predict_proba(input_df)[:, 1][0]
-    custom_threshold = 0.36
-    status = "Approved" if ((xgb_prob >= custom_threshold) and rf_prob >= 0.3) else "Rejected"
+    custom_threshold = 0.25
+    status = "Approved" if ((xgb_prob >= custom_threshold) and rf_prob >= 0.25) else "Rejected"
 
     reasons = []
     if status == "Rejected":
